@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Electronics Store - College Project</title>
+    <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <!-- FontAwesome & Lucide Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Plotly Charts & SweetAlert2 CDN -->
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712;
+            color: #f3f4f6;
+        }
+        .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(99, 102, 241, 0.2);
+            border-radius: 99px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(99, 102, 241, 0.4);
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col bg-slate-950 text-slate-100">
+
+    <!-- TOP NAVIGATION BAR -->
+    <nav class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex flex-wrap items-center justify-between shadow-lg sticky top-0 z-50">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg animate-pulse">
+                <i class="fa-solid fa-microchip text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-display font-bold text-base leading-none text-white tracking-tight">Tech Electronics</h1>
+                <p class="text-[9px] text-slate-400 font-mono tracking-wider uppercase mt-1">MBA PM College Project</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-4 mt-3 sm:mt-0">
+            <!-- Navigation buttons -->
+            <button onclick="switchView('store')" id="nav-store-btn" class="px-4 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow">
+                <i class="fa-solid fa-store mr-1.5"></i>Shop Store
+            </button>
+            <button onclick="openAdminModal()" id="nav-admin-btn" class="px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-300 hover:bg-slate-750">
+                <i class="fa-solid fa-lock mr-1.5"></i>Director Panel
+            </button>
+            <button onclick="toggleAudio()" id="audio-toggle" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300">
+                <i id="audio-icon" class="fa-solid fa-volume-high"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- CONTENT WRAPPER -->
+    <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        
+        <!-- ==================== VIEW 1: CUSTOMER STORE ==================== -->
+        <div id="customer-store-view" class="flex-1 flex flex-col lg:flex-row overflow-hidden w-full">
+            <!-- Left Side: Products Catalog -->
+            <div class="flex-1 flex flex-col overflow-y-auto custom-scrollbar p-6">
+                <!-- Search & Filters -->
+                <div class="flex flex-col md:flex-row gap-4 mb-6 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                    <div class="flex-1 relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                        <input id="search-input" onkeyup="filterProducts()" type="text" placeholder="Search catalog..." class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-600">
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="category-select" onchange="filterProducts()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none">
+                            <option value="All">All Categories</option>
+                            <option value="Laptops">Laptops</option>
+                            <option value="Smartphones">Smartphones</option>
+                            <option value="SSD">Solid State Drives (SSD)</option>
+                            <option value="Smart Watches">Smart Watches</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <!-- Dynamic rendering -->
+                </div>
+            </div>
+
+            <!-- Right Side: Live Shopping Cart -->
+            <div class="w-full lg:w-96 bg-slate-900 border-l border-slate-800 p-6 flex flex-col overflow-y-auto custom-scrollbar shrink-0">
+                <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-800">
+                    <h3 class="font-display font-bold text-base text-white">Live Cart</h3>
+                    <button onclick="clearCart()" class="text-[10px] text-slate-400 font-bold hover:text-red-400">Clear All</button>
+                </div>
+
+                <!-- Cart Items Container -->
+                <div id="cart-container" class="flex-1 space-y-4 overflow-y-auto custom-scrollbar mb-4">
+                    <div class="text-center py-12 text-slate-500 text-xs">
+                        <i class="fa-solid fa-cart-shopping text-3xl mb-3 text-slate-700"></i>
+                        <p>Shopping cart is empty.</p>
+                    </div>
+                </div>
+
+                <!-- Tax & Price calculations -->
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-2 text-xs">
+                    <div class="flex justify-between text-slate-400">
+                        <span>Gross Subtotal</span>
+                        <span id="summary-subtotal" class="font-mono">₹0</span>
+                    </div>
+                    <div class="flex justify-between text-emerald-400 font-bold" id="summary-discount-row" style="display: none;">
+                        <span>Bulk Discount (Applied)</span>
+                        <span id="summary-discount" class="font-mono">-₹0</span>
+                    </div>
+                    <div class="flex justify-between text-slate-500">
+                        <span>GST Share (18%)</span>
+                        <span id="summary-gst" class="font-mono">₹0</span>
+                    </div>
+                    <hr class="border-slate-850 my-2">
+                    <div class="flex justify-between text-white font-bold text-sm">
+                        <span>Net Payable</span>
+                        <span id="summary-final" class="font-mono text-indigo-400">₹0</span>
+                    </div>
+                </div>
+
+                <button onclick="checkoutOrder()" id="checkout-btn" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold mt-4 shadow-lg shadow-indigo-500/10 cursor-pointer">
+                    <i class="fa-solid fa-cash-register mr-1.5"></i>Secure Checkout
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== VIEW 2: DIRECTOR PANEL ==================== -->
+        <div id="admin-panel-view" class="flex-1 flex flex-col overflow-y-auto custom-scrollbar p-6 w-full hidden">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="font-display font-bold text-2xl text-white">Director Analytics Dashboard</h2>
+                    <p class="text-xs text-slate-400">Live monitoring of SQLite registers, CGST allocations, and product inventories.</p>
+                </div>
+                <button onclick="refreshAdminData()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white">
+                    <i class="fa-solid fa-arrows-rotate mr-1.5"></i>Sync Logs
+                </button>
+            </div>
+
+            <!-- KPI Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400">Total Revenue</span>
+                        <h4 id="kpi-revenue" class="text-lg font-mono font-black mt-1 text-white">₹0</h4>
+                    </div>
+                    <div class="p-3 bg-indigo-500/10 rounded-xl text-indigo-500"><i class="fa-solid fa-indian-rupee-sign text-lg"></i></div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400">Products count</span>
+                        <h4 id="kpi-products" class="text-lg font-mono font-black mt-1 text-white">0 Items</h4>
+                    </div>
+                    <div class="p-3 bg-blue-500/10 rounded-xl text-blue-500"><i class="fa-solid fa-box text-lg"></i></div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400">Orders placed</span>
+                        <h4 id="kpi-orders" class="text-lg font-mono font-black mt-1 text-white">0</h4>
+                    </div>
+                    <div class="p-3 bg-violet-500/10 rounded-xl text-violet-500"><i class="fa-solid fa-file-invoice-dollar text-lg"></i></div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400">Inventory Health</span>
+                        <h4 id="kpi-health" class="text-sm font-mono font-bold mt-2 text-amber-500">OOS / Low Stock</h4>
+                    </div>
+                    <div class="p-3 bg-amber-500/10 rounded-xl text-amber-500"><i class="fa-solid fa-triangle-exclamation text-lg"></i></div>
+                </div>
+            </div>
+
+            <!-- Plotly Charts row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+                    <h3 class="font-display font-bold text-sm text-white mb-4"><i class="fa-solid fa-chart-line mr-2 text-indigo-500"></i>Weekly Revenue</h3>
+                    <div id="sales-chart" class="h-64"></div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+                    <h3 class="font-display font-bold text-sm text-white mb-4"><i class="fa-solid fa-chart-pie mr-2 text-emerald-500"></i>Category Distribution</h3>
+                    <div id="category-chart" class="h-64"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIO CLIENT ENGINE -->
+    <script>
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(580, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.12);
+                } else if (type === 'cash') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.45);
+                }
+            } catch (e) {}
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('audio-icon').className = soundEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+            playSound('click');
+        }
+    </script>
+
+    <!-- CORE RETAIL DATABASE CONTROLLER -->
+    <script>
+        let products = [];
+        let cart = [];
+        let orders = [];
+
+        async function loadStore() {
+            try {
+                const res = await fetch('/api/products');
+                products = await res.json();
+                renderProducts();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = '';
+            
+            products.forEach(p => {
+                const cartQty = cart.find(item => item.id === p.id)?.quantity || 0;
+                const remStock = Math.max(0, p.availableQuantity - cartQty);
+                const isSoldOut = remStock === 0;
+
+                const card = `
+                    <div class="bg-slate-900 border rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.01] ${isSoldOut ? 'border-red-500/40 opacity-70' : 'border-slate-800 hover:border-slate-700'}">
+                        <img src="${p.image}" class="w-full h-44 object-cover" referrerpolicy="no-referrer">
+                        <div class="p-5 space-y-3">
+                            <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                                <span>${p.category}</span>
+                                <span>${p.brand}</span>
+                            </div>
+                            <h4 class="font-display font-bold text-sm text-white truncate">${p.name}</h4>
+                            <p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">${p.description}</p>
+                            <div class="flex justify-between items-center pt-2">
+                                <span class="font-mono text-sm font-bold text-indigo-400">₹${p.price.toLocaleString('en-IN')}</span>
+                                <span class="text-[9px] font-mono px-2 py-1 rounded bg-slate-850 ${isSoldOut ? 'text-red-500 bg-red-950/20' : 'text-emerald-400'}">${isSoldOut ? 'Sold Out' : remStock + ' left'}</span>
+                            </div>
+                            <button onclick="addToCart('${p.id}')" ${isSoldOut ? 'disabled' : ''} class="w-full py-2 rounded-xl text-xs font-bold transition-all ${isSoldOut ? 'bg-red-950/30 text-red-500 border border-red-900/30' : 'bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer'}">
+                                ${isSoldOut ? 'Out Of Stock' : 'Add To Cart'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += card;
+            });
+        }
+
+        function addToCart(pId) {
+            playSound('click');
+            const p = products.find(prod => prod.id === pId);
+            const exist = cart.find(item => item.id === pId);
+            if (exist) {
+                if (exist.quantity < p.availableQuantity) exist.quantity++;
+            } else {
+                cart.push({ id: p.id, name: p.name, price: p.price, quantity: 1 });
+            }
+            renderCart();
+            renderProducts();
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-container');
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-slate-500 text-xs">
+                        <i class="fa-solid fa-cart-shopping text-3xl mb-3 text-slate-700"></i>
+                        <p>Shopping cart is empty.</p>
+                    </div>
+                `;
+                updateSummary(0, 0, 0, 0);
+                return;
+            }
+
+            container.innerHTML = '';
+            let subtotal = 0;
+            let qtySum = 0;
+
+            cart.forEach(item => {
+                const rowTotal = item.price * item.quantity;
+                subtotal += rowTotal;
+                qtySum += item.quantity;
+
+                container.innerHTML += `
+                    <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-850">
+                        <div class="min-w-0 flex-1">
+                            <span class="font-bold text-xs text-slate-200 block truncate">${item.name}</span>
+                            <span class="text-[10px] text-indigo-400 font-mono">₹${item.price.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div class="flex items-center space-x-2 shrink-0 ml-3">
+                            <button onclick="updateCartQty('${item.id}', ${item.quantity - 1})" class="w-6 h-6 rounded bg-slate-800 text-xs font-bold text-slate-300">-</button>
+                            <span class="font-mono text-xs text-white">${item.quantity}</span>
+                            <button onclick="updateCartQty('${item.id}', ${item.quantity + 1})" class="w-6 h-6 rounded bg-slate-800 text-xs font-bold text-slate-300">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const discountRate = qtySum >= 50 ? 0.20 : qtySum >= 20 ? 0.15 : qtySum >= 10 ? 0.10 : 0;
+            const discountAmount = subtotal * discountRate;
+            const finalSub = subtotal - discountAmount;
+            const gst = finalSub * (18 / 118);
+
+            updateSummary(subtotal, discountAmount, gst, finalSub);
+        }
+
+        function updateCartQty(pId, qty) {
+            playSound('click');
+            if (qty <= 0) {
+                cart = cart.filter(item => item.id !== pId);
+            } else {
+                const item = cart.find(it => it.id === pId);
+                const p = products.find(prod => prod.id === pId);
+                if (item && qty <= p.availableQuantity) item.quantity = qty;
+            }
+            renderCart();
+            renderProducts();
+        }
+
+        function clearCart() {
+            playSound('click');
+            cart = [];
+            renderCart();
+            renderProducts();
+        }
+
+        function updateSummary(sub, disc, gst, final) {
+            document.getElementById('summary-subtotal').innerText = '₹' + sub.toLocaleString('en-IN');
+            if (disc > 0) {
+                document.getElementById('summary-discount-row').style.display = 'flex';
+                document.getElementById('summary-discount').innerText = '-₹' + disc.toLocaleString('en-IN');
+            } else {
+                document.getElementById('summary-discount-row').style.display = 'none';
+            }
+            document.getElementById('summary-gst').innerText = '₹' + gst.toLocaleString('en-IN');
+            document.getElementById('summary-final').innerText = '₹' + final.toLocaleString('en-IN');
+        }
+
+        async function checkoutOrder() {
+            if (cart.length === 0) return;
+            playSound('cash');
+            
+            // Build checkout body
+            let subtotal = 0;
+            let qtySum = 0;
+            cart.forEach(it => {
+                subtotal += it.price * it.quantity;
+                qtySum += it.quantity;
+            });
+            const discountRate = qtySum >= 50 ? 0.20 : qtySum >= 20 ? 0.15 : qtySum >= 10 ? 0.10 : 0;
+            const discountAmount = subtotal * discountRate;
+            const discountedSubtotal = subtotal - discountAmount;
+            const gstTotal = discountedSubtotal * (18 / 118);
+            const finalAmount = discountedSubtotal;
+
+            const items = cart.map(it => {
+                const rowGst = (it.price * (1 - discountRate)) * (18 / 118) * it.quantity;
+                return {
+                    productId: it.id,
+                    name: it.name,
+                    price: it.price,
+                    quantity: it.quantity,
+                    gstAmount: parseFloat(rowGst.toFixed(2)),
+                    total: it.price * (1 - discountRate) * it.quantity
+                };
+            });
+
+            try {
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customerName: 'Sneha Reddy',
+                        customerEmail: 'sneha.reddy@gmail.com',
+                        customerPhone: '8877665544',
+                        items,
+                        subtotal,
+                        discountAmount,
+                        gstTotal,
+                        finalAmount
+                    })
+                });
+
+                if (res.ok) {
+                    const order = await res.json();
+                    confetti({ particleCount: 150, spread: 80 });
+                    Swal.fire({
+                        title: 'Transaction Successful!',
+                        html: `<b>Order Reference:</b> ${order.orderNumber}<br>Invoice copy dispatched to registers.`,
+                        icon: 'success',
+                        background: '#0f172a',
+                        color: '#f3f4f6',
+                        confirmButtonColor: '#4f46e5'
+                    });
+                    cart = [];
+                    renderCart();
+                    loadStore();
+                }
+            } catch (err) {
+                alert('Connection failure during checkout.');
+            }
+        }
+
+        function switchView(view) {
+            playSound('click');
+            if (view === 'store') {
+                document.getElementById('customer-store-view').classList.remove('hidden');
+                document.getElementById('admin-panel-view').classList.add('hidden');
+                document.getElementById('nav-store-btn').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow";
+                document.getElementById('nav-admin-btn').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-300 hover:bg-slate-750";
+            } else {
+                document.getElementById('customer-store-view').classList.add('hidden');
+                document.getElementById('admin-panel-view').classList.remove('hidden');
+                document.getElementById('nav-store-btn').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-300 hover:bg-slate-750";
+                document.getElementById('nav-admin-btn').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow";
+                loadAnalytics();
+            }
+        }
+
+        function openAdminModal() {
+            playSound('click');
+            Swal.fire({
+                title: 'College Project Auth',
+                html: `<input type="text" id="admin-user" class="swal2-input bg-slate-900 border-slate-800 text-slate-200" placeholder="Username" value="admin">
+                       <input type="password" id="admin-pass" class="swal2-input bg-slate-900 border-slate-800 text-slate-200" placeholder="Password" value="admin123">`,
+                confirmButtonText: 'Sign In',
+                background: '#0f172a',
+                color: '#f3f4f6',
+                confirmButtonColor: '#4f46e5',
+                preConfirm: () => {
+                    const u = document.getElementById('admin-user').value;
+                    const p = document.getElementById('admin-pass').value;
+                    if (u === 'admin' && p === 'admin123') return true;
+                    Swal.showValidationMessage('Invalid credentials. Try admin / admin123');
+                    return false;
+                }
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    switchView('admin');
+                }
+            });
+        }
+
+        async function loadAnalytics() {
+            try {
+                const res = await fetch('/api/analytics');
+                const data = await res.json();
+                
+                document.getElementById('kpi-revenue').innerText = '₹' + data.totalRevenue.toLocaleString('en-IN');
+                document.getElementById('kpi-products').innerText = data.totalProductsCount + ' Items';
+                document.getElementById('kpi-orders').innerText = data.ordersToday + ' Orders';
+                document.getElementById('kpi-health').innerText = `${data.lowStockCount} Low | ${data.outOfStockCount} OOS`;
+
+                // Render Plotly line chart
+                const trace1 = {
+                    x: data.dailyRevenue.map(d => d.date),
+                    y: data.dailyRevenue.map(d => d.revenue),
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    line: { color: '#6366f1', width: 3 },
+                    marker: { color: '#818cf8', size: 8 }
+                };
+                const layout1 = {
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    font: { color: '#94a3b8', size: 10 },
+                    margin: { t: 10, b: 30, l: 40, r: 10 },
+                    xaxis: { gridcolor: '#1e293b' },
+                    yaxis: { gridcolor: '#1e293b' }
+                };
+                Plotly.newPlot('sales-chart', [trace1], layout1);
+
+                // Render Plotly pie chart
+                const trace2 = {
+                    labels: data.categorySales.map(c => c.category),
+                    values: data.categorySales.map(c => c.value),
+                    type: 'pie',
+                    marker: { colors: ['#6366f1', '#10b981', '#f59e0b'] }
+                };
+                const layout2 = {
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    font: { color: '#94a3b8', size: 10 },
+                    margin: { t: 10, b: 10, l: 10, r: 10 }
+                };
+                Plotly.newPlot('category-chart', [trace2], layout2);
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        window.onload = () => {
+            loadStore();
+        };
+    </script>
+</body>
+</html>

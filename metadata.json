@@ -1,0 +1,6 @@
+{
+  "name": "Tech Electronics Store",
+  "description": "An enterprise-level Dynamic Electronics Retail Management System featuring a left-side customer panel, right-side dynamic cart, automatic stock updates, bulk discounts, sound effects, and an interactive admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
