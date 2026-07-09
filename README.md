@@ -1,4 +1,5 @@
 # Tech Electronics Store - MBA Product Management College Project
+Live demo - https://tech-electronics-store.onrender.com
 
 Welcome to your dual-platform, corporate-grade **Dynamic Electronics Retail Management Web Application** developed for your MBA Product Management academic submission.
 
